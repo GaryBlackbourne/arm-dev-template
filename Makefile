@@ -8,7 +8,7 @@ INCLUDE_DIRS = inc
 INCLUDE_FREERTOS = FreeRTOS/Source/include
 FREERTOS_SRC_DIR = FreeRTOS/Source
  # use ARM_CM4F instead of MPU version
-FREERTOS_PORTABLE_DIR = FreeRTOS/Source/portable/GCC/ARM_CM4F
+FREERTOS_PORTABLE_DIR = FreeRTOS/Source/portable/GCC/<YOUR_SPECIFIC_PORT>
 
 OUTPUT_DIR = output
 OBJECTS_DIR = $(OUTPUT_DIR)/objects

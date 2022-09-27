@@ -6,14 +6,11 @@ This is an example project to get started with bare metal programming on registe
 
 ### dependencies
 
-This project requires you to have an arm toolchain installed, and added to your PATH variable. This can be achieved by using your package manager (apt, pacman, ...) and install `arm-none-eabi-gcc` package. This might or might not include arm-none-eabi-gdb, which is the ARM debugger, and recommended to have.
+This project requires you to have an arm toolchain installed, and added to your PATH variable. This can be achieved by using your package manager (apt, pacman, ...) and install `arm-none-eabi-gcc` package.
 
 ``` shell
 sudo pacman -S arm-none-eabi-gcc
-```
-or
-
-``` shell
+# OR
 sudo apt install arm-none-eabi-gcc
 ```
 
@@ -21,15 +18,19 @@ Also `make` is essential tool since this project is using Makefile to compile co
 
 ``` shell
 sudo pacman -S make
-```
-or
-
-``` shell
+# OR
 sudo apt install make
 ```
 
 For latter use, it is recommended to have a terminal which can connect to serial communicators, or debuggers like `screen`, `putty`, or `minicom`.
 
+For debugging, one might need `openOCD` and `arm-none-eabi-gdb`.
+
+``` Shell
+sudo pacman -S openocd arm-none-eabi-gdb
+# OR
+sudo apt install openocd arm-none-eabi-gdb
+```
 
 ### Clone repository
 
@@ -41,18 +42,24 @@ git clone git@github.com:GaryBlackbourne/arm-dev-template.git
 
 ### Download files for your microcontroller
 
-After you cloned the repo, you have to obtain the necessary files from the manufacturer. I used this project with `STM32` and CubeMX generated projects tend to have all necessary files.
+After you cloned the repo, you have to obtain the necessary files from the manufacturer. I used this project with `STM32` and CubeMX generated projects tend to have all necessary files but all manufacturer has to have a mirror, where these files could be downloaded from.
 
 The files you need are:
-- main.c : your main function, self explanatory. In this file you must include your `<device>.h` header file
-- \<device\>.h : For example stm32f303xe.h if you are using an stm32f303 microcontroller. This file is your main source of defines, calls etc. which CMSIS provides.
-- system_\<device\>.c :  
-- startup_\<device\>.s : This file may be a `.c` file, depends on the project, and the microcontroller.
-- \<device\>_ FLASH.ld : This file is called the linker script, and it defines your microcontrollers memory map. 
+- includes - put them in the `inc` directory
+  - \<device\>.h - (note: this might not be in one file, i.e. stm23f303xe.h AND stm32f3xx.h, with stm32f303re)
+  - system_\<device\>.h 
+  - core_\<cpu\>.h
+  - cmsis_compiler.h - (note: this might need a compiler specific header like cmsis_gcc.h)
+- sources - put them in the `src` directory
+  - main.c (this is self explanatory)
+  - system_\<device\>.c 
+  - startup_\<device\>.s
+- other - put it in the project root, next to the Makefile
+  - \<device\>_ FLASH.ld
 
-You can learn about these files at [this site](https://arm-software.github.io/CMSIS_5/Core/html/using_pg.html).
+![](https://www.keil.com/pack/doc/cmsis/Core/html/CMSIS_CORE_Files.png)
 
-### insert the files into specific directories
+You can learn more about these files at [this site](https://arm-software.github.io/CMSIS_5/Core/html/using_pg.html) and [this site](https://www.keil.com/pack/doc/cmsis/Core/html/templates_pg.html).
 
 ### Edit the Makefile
 
@@ -69,20 +76,33 @@ DEVICE = -DSTM32F303xE
 ```
 
 ##### LINKERSCRIPT
-Then edit the linker script the same way, add your linker script.
+Then edit the linker script the same way, add your linker script. In my case for example:
 
 ``` Makefile
 LINKERSCRIPT = STM32F303xE_FLASH.ld
 ```
 
-#### code memory start address
+#### MEMORY_START_ADDR
 Edit the `MEMORY_START_ADDR` variable according to your linkerscript, and MCU specifications.
 
 ##### CMSIS FILES
 Then replace the startup and system templates in the Makefiles `MCU files` segment, and add your hardware specific source files to the project.
 
 
-#### Add sources to your projec
+### Create `compile_commands.json`
+
+If you are using a language server which requres a compile commands JSON file, you can generate it whith the following command, if you have `bear` installed:
+
+```
+bear -- make all
+```
+### Debugging
+
+If you wish to debug your application, then you will need a tool called `openOCD`. This awesome project can be downloaded the same way as other dependencies. Debugging an embedded application requires an openOCD to run a GDB server and connect to the target MCU via the debugger hardver like ST-Link. For this very reason, this project has a shell script named `openocd-start`, which simply starts an openOCD as a background process, and starts a GDB server which you can connect to from your favourite GDB frontend, or even GDB commandline as well.
+
+## Manage the project during development
+
+### Add sources to your projec
 If you wish to add a new source file to the project, then create the file in the `src` directory and append the `SOURCES` variable in the Makefile. 
 
 ``` Makefile
@@ -90,12 +110,4 @@ SOURCES += src/my_shiny_new_source.c
 ```
 
 Header files does not require any work as long as they are put into the `inc` directory.
-
-### Create `compile_commands.json`
-
-If you are using a language server which requres a compile commands JSON file, you can generate it whith the following command:
-
-```
-bear -- make all
-```
 
