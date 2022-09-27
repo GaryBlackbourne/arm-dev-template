@@ -13,6 +13,10 @@ FREERTOS_PORTABLE_DIR = FreeRTOS/Source/portable/GCC/ARM_CM4F
 OUTPUT_DIR = output
 OBJECTS_DIR = $(OUTPUT_DIR)/objects
 
+DEVICE = -D<DEVICE>
+LINKERSCIPT = <linkerscript>.ld
+MEMORY_START_ADDR = 0x8000000
+
 ## project files
 SOURCES = src/main.c
 
@@ -27,10 +31,6 @@ SOURCES += src/system_<device>.c
 ## SOURCES += $(FREERTOS_SRC_DIR)/timers.c				
 ## SOURCES += $(FREERTOS_SRC_DIR)/portable/MemMang/heap_1.c
 ## SOURCES += $(FREERTOS_PORTABLE_DIR)/port.c			# freeRTOS port for ARM CM4F
-
-
-
-DEVICE = -D<DEVICE>
 
 # compiler (and precompiler) options:
 GCC_FLAGS = $(DEVICE) # specify target MCU
@@ -52,40 +52,22 @@ GCC_FLAGS += $(FPU_FLAGS)
 
 # linker options: (-Wl passes options to linker)
 # LD_FLAGS = $(FPU_FLAGS)
-LD_FLAGS = -T"linkerscript.ld" # specify linker script
-LD_FLAGS += -Wl,-Map=$(OUTPUT_DIR)/"STM32F303RE_program.map" #specify .map file
+LD_FLAGS = -T"$(LINKERSCRIPT)" # specify linker script
+LD_FLAGS += -Wl,-Map=$(OUTPUT_DIR)/"program.map" #specify .map file
 LD_FLAGS += -Wl,--gc-sections # linker doesnt link dead code
 LD_FLAGS += -Wl,--start-group -lc -lm -Wl,--end-group # add -l switches and archive files (source: GNU ld manual)
 LD_FLAGS += -static # static linking? (not confirmed)
 
 all: bin
 
-bin: $(OUTPUT_DIR)/STM32F303RE_program.elf
-	arm-none-eabi-objcopy -O binary output/STM32F303RE_program.elf output/program.bin
+bin: $(OUTPUT_DIR)/program.elf
+	arm-none-eabi-objcopy -O binary output/program.elf output/program.bin
 
 flash: 
-	st-flash write output/program.bin 0x8000000
+	st-flash write output/program.bin $(MEMORY_START_ADDR)
 
-$(OUTPUT_DIR)/STM32F303RE_program.elf: $(SOURCES)
+$(OUTPUT_DIR)/program.elf: $(SOURCES)
 	arm-none-eabi-gcc $(GCC_FLAGS) $^ -o $@ $(LD_FLAGS)
-
-#$(OUTPUT_DIR)/STM32F303RE_program.elf: $(OBJECTS_DIR)/main.o $(OBJECTS_DIR)/startup_stm32f303xe.o $(OBJECTS_DIR)/system_stm32f3xx.o
-#	arm-none-eabi-gcc -o $@ $^ $(LD_FLAGS)
-
-#------------------------------------------
-# compile segment, until no better is found
-#------------------------------------------
-#$(OBJECTS_DIR)/main.o: src/main.c
-#	arm-none-eabi-gcc $(GCC_FLAGS) -c $< -o $@
-
-#$(OBJECTS_DIR)/startup_stm32f303xe.o: src/startup_stm32f303xe.s
-#	arm-none-eabi-gcc $(GCC_FLAGS) -c $< -o $@
-
-#$(OBJECTS_DIR)/system_stm32f3xx.o: src/system_stm32f3xx.c
-#	arm-none-eabi-gcc $(GCC_FLAGS) -c $< -o $@
-#------------------------------------------
-# end of compile segment
-#------------------------------------------
 
 command:
 	@echo $(FREERTOS_PORTABLE_DIR)/port.c
