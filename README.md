@@ -50,12 +50,14 @@ The files you need are:
   - system_\<device\>.h 
   - core_\<cpu\>.h
   - cmsis_compiler.h - (note: this might need a compiler specific header like cmsis_gcc.h)
+  - cmsis_version.h 
+  - mpu-armv7.h - if you have an MPU in your controller, then this file is also needed
 - sources - put them in the `src` directory
   - main.c (this is self explanatory)
   - system_\<device\>.c 
   - startup_\<device\>.s
 - other - put it in the project root, next to the Makefile
-  - \<device\>_ FLASH.ld
+  - \<device\>_FLASH.ld
 
 ![](https://www.keil.com/pack/doc/cmsis/Core/html/CMSIS_CORE_Files.png)
 
