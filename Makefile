@@ -1,0 +1,97 @@
+# Simple makefile created to experiment with arm gcc, and cmsis
+
+MAKEFLAGS = --jobs=$(shell nproc) # allow multiple thread to be run when compiling
+MAKEFLAGS += --output-sync=target # buffer commands outputs
+
+#,FreeRTOS/Source/include:
+INCLUDE_DIRS = inc
+INCLUDE_FREERTOS = FreeRTOS/Source/include
+FREERTOS_SRC_DIR = FreeRTOS/Source
+ # use ARM_CM4F instead of MPU version
+FREERTOS_PORTABLE_DIR = FreeRTOS/Source/portable/GCC/ARM_CM4F
+
+OUTPUT_DIR = output
+OBJECTS_DIR = $(OUTPUT_DIR)/objects
+
+## project files
+SOURCES = src/main.c
+
+## MCU files
+SOURCES += src/startup_<device>.s
+SOURCES += src/system_<device>.c				
+
+## FreeRTOS files
+## SOURCES += $(FREERTOS_SRC_DIR)/tasks.c
+## SOURCES += $(FREERTOS_SRC_DIR)/queue.c				
+## SOURCES += $(FREERTOS_SRC_DIR)/list.c				
+## SOURCES += $(FREERTOS_SRC_DIR)/timers.c				
+## SOURCES += $(FREERTOS_SRC_DIR)/portable/MemMang/heap_1.c
+## SOURCES += $(FREERTOS_PORTABLE_DIR)/port.c			# freeRTOS port for ARM CM4F
+
+
+
+DEVICE = -D<DEVICE>
+
+# compiler (and precompiler) options:
+GCC_FLAGS = $(DEVICE) # specify target MCU
+GCC_FLAGS += -I$(INCLUDE_DIRS) # specify include directory
+GCC_FLAGS += -I$(INCLUDE_FREERTOS) # specify directory for freeRTOS
+GCC_FLAGS += -I$(FREERTOS_PORTABLE_DIR) # specify port directory (portmacro.h)
+GCC_FLAGS += -Wall # enable all warnings
+GCC_FLAGS += -ggdb # use maximum amount of info for gdb debugger
+GCC_FLAGS += -mcpu=cortex-m4 # specify CPU core
+GCC_FLAGS += --specs=nano.specs # better newlib implementation (whatever that means?) (not nosys.specs)
+GCC_FLAGS += -mthumb # use thumb instructions
+
+# magic fp shit from (https://embeddedartistry.com/blog/2017/10/11/demystifying-arm-floating-point-compiler-options/) :
+FPU_FLAGS += -mfloat-abi=hard # application binary interface with floating points. hard -> compiler using fp instructions, softfp -> allows fp instructions but maintains compatibility;
+# softfp does link, hard does errors, dont know why :(
+FPU_FLAGS += -mfpu=fpv4-sp-d16 # specify fpu for hard fp abi
+
+GCC_FLAGS += $(FPU_FLAGS)
+
+# linker options: (-Wl passes options to linker)
+# LD_FLAGS = $(FPU_FLAGS)
+LD_FLAGS = -T"linkerscript.ld" # specify linker script
+LD_FLAGS += -Wl,-Map=$(OUTPUT_DIR)/"STM32F303RE_program.map" #specify .map file
+LD_FLAGS += -Wl,--gc-sections # linker doesnt link dead code
+LD_FLAGS += -Wl,--start-group -lc -lm -Wl,--end-group # add -l switches and archive files (source: GNU ld manual)
+LD_FLAGS += -static # static linking? (not confirmed)
+
+all: bin
+
+bin: $(OUTPUT_DIR)/STM32F303RE_program.elf
+	arm-none-eabi-objcopy -O binary output/STM32F303RE_program.elf output/program.bin
+
+flash: 
+	st-flash write output/program.bin 0x8000000
+
+$(OUTPUT_DIR)/STM32F303RE_program.elf: $(SOURCES)
+	arm-none-eabi-gcc $(GCC_FLAGS) $^ -o $@ $(LD_FLAGS)
+
+#$(OUTPUT_DIR)/STM32F303RE_program.elf: $(OBJECTS_DIR)/main.o $(OBJECTS_DIR)/startup_stm32f303xe.o $(OBJECTS_DIR)/system_stm32f3xx.o
+#	arm-none-eabi-gcc -o $@ $^ $(LD_FLAGS)
+
+#------------------------------------------
+# compile segment, until no better is found
+#------------------------------------------
+#$(OBJECTS_DIR)/main.o: src/main.c
+#	arm-none-eabi-gcc $(GCC_FLAGS) -c $< -o $@
+
+#$(OBJECTS_DIR)/startup_stm32f303xe.o: src/startup_stm32f303xe.s
+#	arm-none-eabi-gcc $(GCC_FLAGS) -c $< -o $@
+
+#$(OBJECTS_DIR)/system_stm32f3xx.o: src/system_stm32f3xx.c
+#	arm-none-eabi-gcc $(GCC_FLAGS) -c $< -o $@
+#------------------------------------------
+# end of compile segment
+#------------------------------------------
+
+command:
+	@echo $(FREERTOS_PORTABLE_DIR)/port.c
+
+clean:
+	@rm $(OUTPUT_DIR)/*
+	@echo "Build outputs deleted!"
+
+.PHONY: flash command clean
