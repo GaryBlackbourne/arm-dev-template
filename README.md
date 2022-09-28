@@ -119,6 +119,7 @@ If you wish to debug your application, then you will need a tool called `openOCD
 The project contains a FreeRTOS directory into which you can place the code downloaded from [official source](https://www.freertos.org/). 
 The FreeRTOS project architecture requires the following files:
 
+```
 FreeRTOS
 └── Source
     ├── croutine.c
@@ -160,6 +161,7 @@ FreeRTOS
     ├── stream_buffer.c
     ├── tasks.c
     └── timers.c
+```
 
 These files can be easily downloaded from the official website in a zip format. The .zip contains tons of other files, like demos, examples, ports for various controllers, etc. You only need the `Source` directory, and the appropriate port from the `portabe` directory, and memory management files. Since this project is based on the GCC compiler, we search for our ports there.
 
