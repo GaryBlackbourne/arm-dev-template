@@ -57,7 +57,7 @@ The files you need are:
   - system_\<device\>.c 
   - startup_\<device\>.s
 - other - put it in the project root, next to the Makefile
-  - \<device\>_FLASH.ld
+  - \<device\>\_FLASH.ld
 
 ![](https://www.keil.com/pack/doc/cmsis/Core/html/CMSIS_CORE_Files.png)
 
@@ -113,6 +113,59 @@ bear -- make all
 ### Debugging
 
 If you wish to debug your application, then you will need a tool called `openOCD`. This awesome project can be downloaded the same way as other dependencies. Debugging an embedded application requires an openOCD to run a GDB server and connect to the target MCU via the debugger hardver like ST-Link. For this very reason, this project has a shell script named `openocd-start`, which simply starts an openOCD as a background process, and starts a GDB server which you can connect to from your favourite GDB frontend, or even GDB commandline as well.
+
+### Integrate FreeRTOS
+
+The project contains a FreeRTOS directory into which you can place the code downloaded from [official source](https://www.freertos.org/). 
+The FreeRTOS project architecture requires the following files:
+
+FreeRTOS
+└── Source
+    ├── croutine.c
+    ├── event_groups.c
+    ├── include
+    │   ├── atomic.h
+    │   ├── croutine.h
+    │   ├── deprecated_definitions.h
+    │   ├── event_groups.h
+    │   ├── FreeRTOS.h
+    │   ├── list.h
+    │   ├── message_buffer.h
+    │   ├── mpu_prototypes.h
+    │   ├── mpu_wrappers.h
+    │   ├── portable.h
+    │   ├── projdefs.h
+    │   ├── queue.h
+    │   ├── semphr.h
+    │   ├── stack_macros.h
+    │   ├── StackMacros.h
+    │   ├── stdint.readme
+    │   ├── stream_buffer.h
+    │   ├── task.h
+    │   └── timers.h
+    ├── list.c
+    ├── portable
+    │   ├── GCC
+    │   │   └── \<YOUR_PORT\>
+    │   │       ├── port.c
+    │   │       └── portmacro.h
+    │   └── MemMang
+    │       ├── heap_1.c
+    │       ├── heap_2.c
+    │       ├── heap_3.c
+    │       ├── heap_4.c
+    │       ├── heap_5.c
+    │       └── ReadMe.url
+    ├── queue.c
+    ├── stream_buffer.c
+    ├── tasks.c
+    └── timers.c
+
+These files can be easily downloaded from the official website in a zip format. The .zip contains tons of other files, like demos, examples, ports for various controllers, etc. You only need the `Source` directory, and the appropriate port from the `portabe` directory, and memory management files. Since this project is based on the GCC compiler, we search for our ports there.
+
+Other than that, you only need a `FreeRTOSConfig.h` which can be created based on templates you already downloaded in the FreeRTOS zip file, or you can write your own based on the [documentation](https://www.freertos.org/a00110.html).
+
+Now uncomment the sources int the sources in the Makefiles `FreeRTOS files` segment, and set the appropriate port, in the `FREERTOS_PORTABLE_DIR` variable.
 
 ## Manage the project during development
 
