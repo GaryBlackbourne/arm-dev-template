@@ -32,7 +32,7 @@ SOURCES += src/system_<device>.c
 ## SOURCES += $(FREERTOS_SRC_DIR)/portable/MemMang/heap_1.c
 ## SOURCES += $(FREERTOS_PORTABLE_DIR)/port.c			# freeRTOS port for ARM CM4F
 
-# compiler (and precompiler) options:
+# compiler (and precompiler) flags:
 GCC_FLAGS = $(DEVICE) # specify target MCU
 GCC_FLAGS += -I$(INCLUDE_DIRS) # specify include directory
 GCC_FLAGS += -I$(INCLUDE_FREERTOS) # specify directory for freeRTOS
@@ -43,10 +43,9 @@ GCC_FLAGS += -mcpu=cortex-m4 # specify CPU core
 GCC_FLAGS += --specs=nano.specs # better newlib implementation (whatever that means?) (not nosys.specs)
 GCC_FLAGS += -mthumb # use thumb instructions
 
-# magic fp shit from (https://embeddedartistry.com/blog/2017/10/11/demystifying-arm-floating-point-compiler-options/) :
-FPU_FLAGS += -mfloat-abi=hard # application binary interface with floating points. hard -> compiler using fp instructions, softfp -> allows fp instructions but maintains compatibility;
-# softfp does link, hard does errors, dont know why :(
-FPU_FLAGS += -mfpu=fpv4-sp-d16 # specify fpu for hard fp abi
+# FPU flags:
+FPU_FLAGS += -mfloat-abi=soft # application binary interface with floating points. hard -> compiler using fp instructions, softfp -> allows fp instructions but maintains compatibility;
+# FPU_FLAGS += -mfpu=fpv4-sp-d16 # specify fpu for hard fp abi
 
 GCC_FLAGS += $(FPU_FLAGS)
 
