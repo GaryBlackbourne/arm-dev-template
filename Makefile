@@ -73,4 +73,11 @@ clean:
 	@rm $(OUTPUT_DIR)/*
 	@echo "Build outputs deleted!"
 
-.PHONY: flash command clean
+term:
+	@screen /dev/ttyUSB0 115200
+
+bear:
+	@bear -- $(MAKE) all
+
+.PHONY: flash command clean term bear
+
