@@ -65,41 +65,58 @@ You can learn more about these files at [this site](https://arm-software.github.
 
 ### Edit the Makefile
 
-The projects heart is a single Makefile which gives you total control over the project. After you placed the necessary files 
-into their places (headers to `inc`, and sources to `src`) you have to edit the Makefile to match your projects architecture.
+The projects heart is a single Makefile which gives you total control over the project.
+After you placed the necessary files into their places (headers to `inc`, 
+and sources to `src`) you have to edit the Makefile to match your projects architecture.
 
 #### Initial moves
 
 ##### DEVICE
-First, find the `DEVICE` variable and replace the template with your microcontrollers type. Some microcontrollers have to have a define in the code which specifies the device being used. This essentially does the same, only it does not in the code, but in the compilers arguments list. For an STM32 based project, this can be obtained from the device header file, which has a commented segment with all the possible define values. For my F303RE this would look like this:
+First, find the `DEVICE` variable and replace the template with your 
+microcontrollers type. Some microcontrollers have to have a define in the code 
+which specifies the device being used. This essentially does the same, only it is 
+not in the code, but in the compilers arguments list. For an STM32 based project, this 
+can be obtained from the device header file, which has a commented segment with all 
+the possible define values. For my F303RE this would look like this:
 
 ``` Makefile
 DEVICE = -DSTM32F303xE
 ```
 
 ##### LINKERSCRIPT
-Then edit the linker script the same way, add your linker script. In my case for example:
+Then edit the LINKERSCRIPT variable the same way, add your linker script. 
+In my case for example:
 
 ``` Makefile
 LINKERSCRIPT = STM32F303xE_FLASH.ld
 ```
 
 #### MEMORY_START_ADDR
-Edit the `MEMORY_START_ADDR` variable according to your linkerscript, and MCU specifications. This value is the beginning of your program so it should be, where the FLASH segment starts in your controllers memory map.
+Edit the `MEMORY_START_ADDR` variable according to your linkerscript, 
+and MCU specifications. This value is the beginning of your program so 
+it should be, where the FLASH segment starts in your controllers memory map.
 
 ##### CMSIS FILES
-Then replace the startup and system templates in the Makefiles `MCU files` segment, and add your hardware specific source files to the project.
+Then replace the startup and system templates in the Makefiles `MCU files` 
+segment, and add your hardware specific source files to the project.
 
 #### CPU flag
-You have to set for which CPU are you compiling with the `-mcpu` flag which is by default is equal to cortex-m4. You may find this flag in the Makefiles `compiler (and precompiler) flags`. This value obiviously tells the compiler, which CPU core is in use.
+You have to set for which CPU are you compiling with the `-mcpu` flag 
+which is by default is equal to cortex-m4. You may find this flag in 
+the Makefiles `compiler (and precompiler) flags`. This value obiviously tells 
+the compiler, which CPU core is in use.
 
 #### FPU flags
-Some controllers, have an FPU embedded, int that case, you have to specify the type for the compiler. There is a segment called `FPU flags` in the Makefile, where you can set the appropriate options.
+Some controllers, have an FPU embedded, int that case, you have to specify the 
+type for the compiler. There is a segment called `FPU flags` in the Makefile, where 
+you can set the appropriate options.
 
-If you have no FPU in your device, then set `-mfloat-abi=soft`and comment out the `-mfpu=...` flag. This 
-makes the compiler to generate emulated floating point operations, which are much slower, but still works. 
-If you have an FPU, then you can specify how the floating point operations should work, using the flags mentioned above. 
-More on this topic, and about values can be found here: [FPU-know-how](https://embeddedartistry.com/blog/2017/10/11/demystifying-arm-floating-point-compiler-options/)
+If you have no FPU in your device, then set `-mfloat-abi=soft`and comment 
+out the `-mfpu=...` flag. This makes the compiler to generate emulated floating 
+point operations, which are much slower, but still works. If you have an FPU, 
+then you can specify how the floating point operations should work, using 
+the flags mentioned above. More on this topic, and about values can be found here: 
+[FPU-know-how](https://embeddedartistry.com/blog/2017/10/11/demystifying-arm-floating-point-compiler-options/)
 
 
 
