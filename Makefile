@@ -1,6 +1,5 @@
 # Simple makefile created to experiment with arm gcc, and cmsis
-
-MAKEFLAGS = --jobs=$(shell nproc) # allow multiple thread to be run when compiling
+MAKEFLAGS += --jobs=$(shell nproc) # allow multiple thread to be run when compiling
 MAKEFLAGS += --output-sync=target # buffer commands outputs
 
 INCLUDE_DIRS = inc
@@ -30,8 +29,8 @@ SOURCES += src/system_<device>.c
 ## SOURCES += $(FREERTOS_SRC_DIR)/portable/MemMang/heap_1.c
 ## SOURCES += $(FREERTOS_PORTABLE_DIR)/port.c			# freeRTOS port for ARM CM4F
 
-# compiler (and precompiler) flags:
-GCC_FLAGS = $(DEVICE) # specify target MCU
+# compiler flags:
+GCC_FLAGS += $(DEVICE) # specify target MCU
 GCC_FLAGS += -I$(INCLUDE_DIRS) # specify include directory
 GCC_FLAGS += -I$(INCLUDE_FREERTOS) # specify directory for freeRTOS
 GCC_FLAGS += -I$(FREERTOS_PORTABLE_DIR) # specify port directory (portmacro.h)
