@@ -1,7 +1,0 @@
-* Framework letölthető:
-** STM32
-- [[https://github.com/STMicroelectronics/STM32CubeF1][STM32 Cube F1]]
-- [[https://github.com/STMicroelectronics/STM32CubeF2][STM32 Cube F2]]
-** Silabs
-- 
-

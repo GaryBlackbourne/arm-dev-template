@@ -1,12 +1,30 @@
 # ARM CMSIS project template
 
-This is an example project to get started with bare metal programming on register level, with ARM Cortex microcontrollers. The project includes a FreeRTOS template as well, but source files have to be downloaded separately.
+This project template is an example, created to ease bootstrapping a project. 
+The architecture is flexible, and allows bare metal programming on register levels, but 
+makes it easy to integrate any library or abstraction layer.
+
+## Architecture
+
+This project template has a modular architecture. You may add modules at your own liking,
+separating source files into modules based on functionality. This behavior is achieved
+by using a main shell script (`build.sh`) which invokes every modules own script 
+(`module.sh`). All module scripts are responsible for their modules build. 
+Most may only call make, and then copies output, but complex modules may call 
+submodule scripts and so on.
+
+To start a simple build, you only need to execute the `build.sh` file in the project
+root directory.
 
 ## Project setup
 
 ### dependencies
 
-This project requires you to have an arm toolchain installed, and added to your PATH variable. This can be achieved by using your package manager (apt, pacman, ...) and install `arm-none-eabi-gcc` package.
+#### Toolchain
+
+This project requires you to have a toolchain installed, and added to your PATH variable.
+This can be achieved by using your package manager (apt, pacman, ...).
+To use gcc, install `arm-none-eabi-gcc` package.
 
 ``` shell
 sudo pacman -S arm-none-eabi-gcc
@@ -14,7 +32,19 @@ sudo pacman -S arm-none-eabi-gcc
 sudo apt install arm-none-eabi-gcc
 ```
 
-Also `make` is essential tool since this project is using Makefile to compile code.
+This package contains a compiler and a linker as well. 
+Both sould be set, in the `settings.sh` file. (CC -> Compiler, LD -> linker)
+
+*Note: For gcc it is recommended to invoke gcc as linker, and pass linker arguments as -Wl,\<arg\> *
+
+#### Shell 
+
+The scripts are written in `bash`, so this or any compatible shell is needed. 
+
+#### GNU Make
+
+Also `make` is essential tool since this project is using Makefiles to invoke 
+the compiler.
 
 ``` shell
 sudo pacman -S make
@@ -22,7 +52,11 @@ sudo pacman -S make
 sudo apt install make
 ```
 
+#### Serial terminal
+
 For latter use, it is recommended to have a terminal which can connect to serial communicators, or debuggers like `screen`, `putty`, or `minicom`.
+
+#### Debugger
 
 For debugging, one might need `openOCD` and `arm-none-eabi-gdb`.
 
@@ -32,21 +66,31 @@ sudo pacman -S openocd arm-none-eabi-gdb
 sudo apt install openocd arm-none-eabi-gdb
 ```
 
-### Clone repository
+### Bootstrap project
 
-Clone this repostitory the way you wish, I presume you are using a linux system.
+#### Clone the repo
+
+Clone this repostitory into your project directory:
 
 ```
-git clone git@github.com:GaryBlackbourne/arm-dev-template.git
+git clone <project_dir> git@github.com:GaryBlackbourne/arm-dev-template.git
 ```
 
-### Download files for your microcontroller
+#### Get the hardware specific sources
 
-After you cloned the repo, you have to obtain the necessary files from the manufacturer. I used this project with `STM32` and CubeMX generated projects tend to have all necessary files but all manufacturer has to have a mirror, where these files could be downloaded from.
+After you cloned the repo, you have to obtain the necessary files from the manufacturer. 
+For `STM32` target I recommend CubeMX to download paackages or straight up projects, and copy the necessary files.
+It tend to have all necessary files but all manufacturer has to have a mirror, where these files could be
+downloaded from.
+
+
+ARM forces all manufacturers to have some sort of implementation of these files for their hardware, as it is part of the 
+CMSIS (Cortex Microcontroller Software Interface Standard).
+
 
 The files you need are:
-- includes - put them in the `inc` directory
-  - \<device\>.h - (note: this might not be in one file, i.e. stm23f303xe.h AND stm32f3xx.h, with stm32f303re)
+- includes 
+  - \<device\>.h - (note: this might not only be one file, for example for an stm32f303re you have to have stm23f303xe.h AND stm32f3xx.h)
   - system_\<device\>.h 
   - core_\<cpu\>.h
   - cmsis_compiler.h - (note: this might need a compiler specific header like cmsis_gcc.h)
@@ -56,22 +100,29 @@ The files you need are:
   - main.c (this is self explanatory)
   - system_\<device\>.c 
   - startup_\<device\>.s
-- other - put it in the project root, next to the Makefile
+- Linkerscript
   - \<device\>\_FLASH.ld
 
 ![](https://www.keil.com/pack/doc/cmsis/Core/html/CMSIS_CORE_Files.png)
 
 You can learn more about these files at [this site](https://arm-software.github.io/CMSIS_5/Core/html/using_pg.html) and [this site](https://www.keil.com/pack/doc/cmsis/Core/html/templates_pg.html).
 
-### Edit the Makefile
+#### Add the sources to the mcu module
 
-The projects heart is a single Makefile which gives you total control over the project.
-After you placed the necessary files into their places (headers to `inc`, 
-and sources to `src`) you have to edit the Makefile to match your projects architecture.
+The project has a module already defined for the CMSIS files; this module is called `mcu` module. 
+Inside `modules/mcu` you find a readme which tells you exactly what sort of files go where. Basically
+you only have to copy all sources to `modules/mcu/src` and all headers to `modules/mcu/inc`. The linkerscript 
+should be placed in the module root (modules/mcu).
 
-#### Initial moves
+#### Use the core module
+
+The main functionality is implemented in a specific module called `core`. This module already has a `main.c` file in the `src` directory.
+The programs entry is the main function which you may write in this module. 
+
+#### Edit the settings.sh script
 
 ##### DEVICE
+
 First, find the `DEVICE` variable and replace the template with your 
 microcontrollers type. Some microcontrollers have to have a define in the code 
 which specifies the device being used. This essentially does the same, only it is 
@@ -79,36 +130,35 @@ not in the code, but in the compilers arguments list. For an STM32 based project
 can be obtained from the device header file, which has a commented segment with all 
 the possible define values. For my F303RE this would look like this:
 
-``` Makefile
-DEVICE = -DSTM32F303xE
+``` shell
+DEVICE="STM32F303xE"
 ```
 
 ##### LINKERSCRIPT
 Then edit the LINKERSCRIPT variable the same way, add your linker script. 
 In my case for example:
 
-``` Makefile
-LINKERSCRIPT = STM32F303xE_FLASH.ld
+``` shell
+LINKERSCRIPT=modules/mcu/STM32F303xE_FLASH.ld
 ```
 
-#### MEMORY_START_ADDR
+##### MEMORY_START_ADDR
+
 Edit the `MEMORY_START_ADDR` variable according to your linkerscript, 
 and MCU specifications. This value is the beginning of your program so 
 it should be, where the FLASH segment starts in your controllers memory map.
 
-##### CMSIS FILES
-Then replace the startup and system templates in the Makefiles `MCU files` 
-segment, and add your hardware specific source files to the project.
+This variable is only used during flashing.
 
-#### CPU flag
+#### CPU
 You have to set for which CPU are you compiling with the `-mcpu` flag 
-which is by default is equal to cortex-m4. You may find this flag in 
-the Makefiles `compiler (and precompiler) flags`. This value obiviously tells 
+which is in my example is equal to cortex-m4. This value tells 
 the compiler, which CPU core is in use.
 
-#### FPU flags
+#### FPU
+
 Some controllers, have an FPU embedded, int that case, you have to specify the 
-type for the compiler. There is a segment called `FPU flags` in the Makefile, where 
+type for the compiler. There is an `FPU flags` in the settings, where 
 you can set the appropriate options.
 
 If you have no FPU in your device, then set `-mfloat-abi=soft`and comment 
@@ -118,22 +168,34 @@ then you can specify how the floating point operations should work, using
 the flags mentioned above. More on this topic, and about values can be found here: 
 [FPU-know-how](https://embeddedartistry.com/blog/2017/10/11/demystifying-arm-floating-point-compiler-options/)
 
-
+This compiler flag does not have its own variable, feel free to edit the `COMPILER_FLAGS`
+variable.
 
 ### Create `compile_commands.json`
 
-If you are using a language server which requres a compile commands JSON file, you can generate it whith the following command, if you have `bear` installed:
+If you are using a language server which requres a compile commands JSON file (clangd), 
+you can generate it whith the following command, if you have `bear` installed:
 
 ```
-bear -- make all
+bear -- build.sh
 ```
+
+It is recommended to generate this when you add another module.
+
 ### Debugging
 
-If you wish to debug your application, then you will need a tool called `openOCD`. This awesome project can be downloaded the same way as other dependencies. Debugging an embedded application requires an openOCD to run a GDB server and connect to the target MCU via the debugger hardver like ST-Link. For this very reason, this project has a shell script named `openocd-start`, which simply starts an openOCD as a background process, and starts a GDB server which you can connect to from your favourite GDB frontend, or even GDB commandline as well.
+If you wish to debug your application, then you will need a tool called `openOCD`. 
+This awesome project can be downloaded the same way as other dependencies. Debugging
+an embedded application requires an openOCD to run a GDB server and connect to the 
+target MCU via the debugger hardver like ST-Link. For this very reason, this project
+has a shell script named `openocd-start`, which simply starts an openOCD as a background
+process, and starts a GDB server which you can connect to from your favourite GDB
+frontend, or even GDB commandline as well.
 
 ### Integrate FreeRTOS
 
-The project contains a FreeRTOS directory into which you can place the code downloaded from [official source](https://www.freertos.org/). 
+The project contains a FreeRTOS module into which you can place the code 
+downloaded from [official source](https://www.freertos.org/). 
 The FreeRTOS project architecture requires the following files:
 
 ```
@@ -180,19 +242,13 @@ FreeRTOS
     └── timers.c
 ```
 
-These files can be easily downloaded from the official website in a zip format. The .zip contains tons of other files, like demos, examples, ports for various controllers, etc. You only need the `Source` directory, and the appropriate port from the `portabe` directory, and memory management files. Since this project is based on the GCC compiler, we search for our ports there.
+These files can be easily downloaded from the official website in a zip archive.
+The .zip contains tons of other files, like demos, examples, ports for various 
+controllers, etc. You only need the `Source` directory, and the appropriate port from 
+the `portabe` directory, and memory management files. Since this project is 
+based on the GCC compiler, we search for our ports there.
 
-Other than that, you only need a `FreeRTOSConfig.h` which can be created based on templates you already downloaded in the FreeRTOS zip file, or you can write your own based on the [documentation](https://www.freertos.org/a00110.html).
+Other than that, you only need a `FreeRTOSConfig.h` which can be created based 
+on templates you already downloaded in the FreeRTOS zip file, or you can write your own 
+based on the [documentation](https://www.freertos.org/a00110.html).
 
-Now uncomment the sources int the sources in the Makefiles `FreeRTOS files` segment, and set the appropriate port, in the `FREERTOS_PORTABLE_DIR` variable.
-
-## Manage the project during development
-
-### Add sources to your projec
-If you wish to add a new source file to the project, then create the file in the `src` directory and append the `SOURCES` variable in the Makefile. 
-
-``` Makefile
-SOURCES += src/my_shiny_new_source.c
-```
-
-Header files does not require any work as long as they are put into the `inc` directory.
