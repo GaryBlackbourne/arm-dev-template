@@ -23,13 +23,14 @@ root directory.
 #### Toolchain
 
 This project requires you to have a toolchain installed, and added to your PATH variable.
-This can be achieved by using your package manager (apt, pacman, ...).
+This can be achieved by using your package manager (apt, pacman, ...), or 
+alternatively you can compile the toolchain from source. 
 To use gcc, install `arm-none-eabi-gcc` package.
 
 ``` shell
 sudo pacman -S arm-none-eabi-gcc
 # OR
-sudo apt install arm-none-eabi-gcc
+sudo apt install gcc-arm-none-eabi
 ```
 
 This package contains a compiler and a linker as well. 
