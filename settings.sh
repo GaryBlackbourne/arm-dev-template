@@ -7,16 +7,31 @@ fi
 
 printf "Source settings ... "
 
-export PROJECT_NAME="<PROJECT_NAME>"
-export CC="/usr/bin/arm-none-eabi-gcc"
-export LD="/usr/bin/arm-none-eabi-gcc"
-# export LD="/usr/bin/arm-none-eabi-ld"
+# Project name
+PROJECT_NAME=""
 
-DEVICE="<DEVICE>"
-CPU="<your_cpu_type>"
+# Toolchain settings
+CC="/usr/bin/arm-none-eabi-gcc"
+LD="/usr/bin/arm-none-eabi-gcc"
+
+# Compilation and linking settings
+DEVICE=""
+CPU=""
 MAPFILE="build/program.map"
-LINKERSCRIPT="modules/mcu/<LINKERSCRIPT>"
-MEMORY_START_ADDR="<your_memory_start_address>"
+LINKERSCRIPT="modules/mcu/<linkerscript>"
+MEMORY_START_ADDR=""
+
+
+# Directory settings
+BUILD_DIR="$PROJECT_ROOT"/build
+OBJECT_DIR="$BUILD_DIR"/obj
+OUTPUT_DIR="$BUILD_DIR"/out
+
+
+# Modules that are included in a build
+# The order goes by descending priority, so the FIRST item has the BIGGEST priority,
+# and the LAST item has the LOWEST priority
+MODULES=""
 
 # general compiler options
 COMPILER_FLAGS=(
@@ -33,7 +48,7 @@ COMPILER_FLAGS=(
     "-O0"
 )
 
-# general linker options: 
+# general linker options
 LINKER_FLAGS=(
     "-Wl,-T\"$LINKERSCRIPT\""  # specify linker script
     "-Wl,-Map=$MAPFILE"    # specify .map file
@@ -43,9 +58,24 @@ LINKER_FLAGS=(
     "-Wl,-static"              # static linking?
 )
 
-export GCC_FLAGS=$(echo "${COMPILER_FLAGS[@]}")
-export LD_FLAGS=$(echo "${LINKER_FLAGS[@]}")
-export OBJECT_DIR=$(realpath build/obj)
+LD_FLAGS=$("${LINKER_FLAGS[@]}")
+GCC_FLAGS=$("${COMPILER_FLAGS[@]}")
+
+
+# Export necessary build environment settings
+export PROJECT_NAME
+
+export BUILD_DIR
+export OBJECT_DIR
+export OUTPUT_DIR
+
+export MODULES
+
+export CC
+export LD
+
+export GCC_FLAGS
+export LD_FLAGS
 
 printf "DONE!\n"
 

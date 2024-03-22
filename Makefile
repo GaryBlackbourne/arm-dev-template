@@ -1,12 +1,12 @@
-all: build/out/program.elf
-	arm-none-eabi-objcopy -O binary $^ build/out/program.bin
+all: $(OUTPUT_DIR)/program.elf
+	arm-none-eabi-objcopy -O binary $^ $(OUTPUT_DIR)/program.bin
 
-objects = $(wildcard build/obj/*.o)
+objects = $(wildcard $(OBJECT_DIR)/*.o)
 
-build/out/program.elf: $(objects)
+$(OUTPUT_DIR)/program.elf: $(objects)
 	$(LD) $^ -o $@ $(LD_FLAGS)
 
-flash: out/program.bin
+flash: $(OUTPUT_DIR)/program.bin
 	st-flash write $^ $(MEMORY_START_ADDR)
 
 command:
@@ -14,7 +14,5 @@ command:
 
 term:
 	@screen /dev/ttyUSB0 115200
-bear:
-	@bear -- $(MAKE) all
 
 
