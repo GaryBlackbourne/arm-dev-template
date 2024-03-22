@@ -31,7 +31,10 @@ OUTPUT_DIR="$BUILD_DIR"/out
 # Modules that are included in a build
 # The order goes by descending priority, so the FIRST item has the BIGGEST priority,
 # and the LAST item has the LOWEST priority
-MODULES=""
+MODULES=(
+    "mcu"
+    "core"
+)
 
 # general compiler options
 COMPILER_FLAGS=(

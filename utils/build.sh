@@ -31,7 +31,7 @@ printf "Start building project %s\n" "$PROJECT_NAME"
 printf "Compiling modules...\n"
 
 # compile each module
-for MODULE in $MODULES; do
+for MODULE in "${MODULES[@]}"; do
     # if module directory exists, and module contaings a module script then execute
     if [ -d "$PROJECT_ROOT/modules/$MODULE" ] &&  [ -f "$PROJECT_ROOT/modules/$MODULE/module.sh" ]; then
         pushd "$(dirname "$MODULE")" || exit 1
