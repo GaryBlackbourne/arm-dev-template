@@ -1,0 +1,5 @@
+depends = mcu core
+dirs := $(foreach dep, $(depends), ../$(dep)/inc)
+files := $(foreach dir,$(dirs),$(wildcard $(dir)/*.h))
+all:
+	@echo $(files)
