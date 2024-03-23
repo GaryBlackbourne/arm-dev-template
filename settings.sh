@@ -61,8 +61,8 @@ LINKER_FLAGS=(
     "-Wl,-static"              # static linking?
 )
 
-LD_FLAGS=$("${LINKER_FLAGS[@]}")
-GCC_FLAGS=$("${COMPILER_FLAGS[@]}")
+LD_FLAGS="${LINKER_FLAGS[@]}"
+GCC_FLAGS="${COMPILER_FLAGS[@]}"
 
 
 # Export necessary build environment settings

@@ -24,7 +24,7 @@ if [ -z "$MODULES" ]; then printf "Module list is empty"; exit 1; fi
 
 # Creating build directory if not exists
 mkdir -p "$OUTPUT_DIR"
-mdkir -p "$OBJECT_DIR"
+mkdir -p "$OBJECT_DIR"
 
 
 printf "Start building project %s\n" "$PROJECT_NAME"
