@@ -5,9 +5,10 @@ MODULE_DEPENDS = mcu core
 # search for additional dependency includes
 dep_include_dirs := $(foreach mod,$(MODULE_DEPENDS),../$(mod)/inc)
 
-# add to gcc includes
 gcc_include_dirs := $(foreach inc_dir,$(dep_include_dirs),-I$(inc_dir))
 gcc_include_dirs += -Iinc
+
+# add self and dependencies to gcc include directories
 GCC_FLAGS += $(gcc_include_dirs)
 
 #deps = $(wildcard inc/*.h)
